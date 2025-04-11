@@ -5,9 +5,8 @@ import dagger.hilt.android.HiltAndroidApp
 
 
 @HiltAndroidApp
-class AppApplication :Application(){
+class AppApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-//        Timber.plant(Timber.DebugTree())
     }
 }
