@@ -25,6 +25,7 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
     }
 
     kotlinOptions {
@@ -44,8 +45,7 @@ kapt {
 }
 
 dependencies {
-//    implementation project(':domain')
-//    implementation project(':data')
+    implementation project(':domain')
 
     // Core Android dependencies
     implementation libs.androidx.core.ktx
@@ -55,6 +55,7 @@ dependencies {
     implementation libs.androidx.constraintlayout
 
     implementation 'com.squareup.retrofit2:converter-scalars:2.9.0'
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.1.5"
 
     // Navigation
     def nav_version = "2.7.7"
