@@ -1,126 +1,124 @@
 package com.yju.presentation.view.home
 
-import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.yju.domain.pdf.model.PdfUploadModel
-import com.yju.domain.pdf.usecase.PdfJoinUseCase
+import com.yju.domain.pdf.model.PdfModel
 import com.yju.presentation.base.BaseViewModel
-import com.yju.presentation.util.EventFlow
 import com.yju.presentation.util.MutableEventFlow
+import com.yju.presentation.util.EventFlow
+import com.yju.presentation.util.Navigation
+import com.yju.presentation.util.asEventFlow
+import com.yju.presentation.view.pdf.chapter.PdfChapterFragment
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import java.io.File
-import java.io.FileOutputStream
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.cancel
 import javax.inject.Inject
 
+/**
+ * HomeViewModel - 홈 화면 상태 관리 및 네비게이션 제어
+ * 성능 최적화 리팩토링
+ */
 @HiltViewModel
-class HomeViewModel @Inject constructor(
-    private val pdfJoinUseCase: PdfJoinUseCase
-) : BaseViewModel() {
+class HomeViewModel @Inject constructor() : BaseViewModel() {
+    companion object {
+        private const val TAG = "HomeViewModel"
+        private const val MIN_NAVIGATION_INTERVAL = 500L  // 네비게이션 최소 간격(ms)
+    }
 
-    // 파일 정보
+    // 백그라운드 작업을 위한 IO 스코프
+    private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    // 작업 취소를 위한 Job 맵
+    private val jobMap = mutableMapOf<String, Job>()
+
+    private var lastNavigationTime = 0L
+
+    private val _navigationEvent = MutableEventFlow<Navigation>()
+    val navigationEvent: EventFlow<Navigation> = _navigationEvent.asEventFlow()
+
+    // ─── 파일 선택 및 업로드 상태 ────────────────────────────────────
     private val _selectedFileUri = MutableLiveData<Uri?>()
     val selectedFileUri: LiveData<Uri?> = _selectedFileUri
 
-    private val _selectedFileName = MutableLiveData<String>()
-    val selectedFileName: LiveData<String> = _selectedFileName
+    private val _selectedFileName = MutableLiveData<String?>()
+    val selectedFileName: LiveData<String?> = _selectedFileName
 
-    // 업로드 결과
-    private val _uploadResponse = MutableLiveData<PdfUploadModel?>()
-    val uploadResponse: LiveData<PdfUploadModel?> = _uploadResponse
-
-    private val _onClickUpload = MutableEventFlow<Boolean>()
-    val onClickUpload : EventFlow<Boolean> get() = _onClickUpload
-
-
-    // 파일 URI, 파일 이름 설정
-    fun setSelectedFileUri(uri: Uri?, fileName: String) {
-        _selectedFileUri.value = uri
-        _selectedFileName.value = fileName
-    }
-
-    // UI 초기화
-    fun resetUiState() {
-        _selectedFileUri.value = null
-        _selectedFileName.value = ""
-        _uploadResponse.value = null
-    }
+    private val _isUploading = MutableLiveData(false)
+    val isUploading: LiveData<Boolean> = _isUploading
 
     /**
-     * PDF 파일을 서버로 업로드하는 로직
+     * ViewModel 정리
      */
-    fun uploadFile(context: Context, uri: Uri, fileName: String) {
+    override fun onCleared() {
+        super.onCleared()
+        ioScope.cancel()
+        jobMap.values.forEach { it.cancel() }
+        jobMap.clear()
+    }
+
+    protected fun showLoading() {
+        baseEvent(UiEvent.Loading.Show)
+    }
+
+    protected fun hideLoading() {
+        baseEvent(UiEvent.Loading.Hide)
+    }
+
+    private fun emitNavigation(event: Navigation) {
+        val currentTime = System.currentTimeMillis()
+
+        // 중복 네비게이션 방지 - 최소 간격 체크
+        if (currentTime - lastNavigationTime < MIN_NAVIGATION_INTERVAL) {
+            Log.d(TAG, "네비게이션 무시: 최소 간격 내 ($MIN_NAVIGATION_INTERVAL ms)")
+            return
+        }
+
+        lastNavigationTime = currentTime
+
         viewModelScope.launch {
-            // 로딩 시작
-            baseEvent(UiEvent.Loading.Show)
-
             try {
-                // 1) Uri -> 임시 File 로 복사
-                val file = withContext(Dispatchers.IO) {
-                    uri.toFile(context, fileName)
-                }
-
-                // 파일 변환 성공 시 토스트 표시
-                baseEvent(UiEvent.Toast.Normal("파일 변환 중..."))
-
-                // 2) Multipart Body 생성
-                val requestBody = file.asRequestBody("application/pdf".toMediaTypeOrNull())
-                val filePart = MultipartBody.Part.createFormData("file", file.name, requestBody)
-
-                // 업로드 시작 토스트 표시
-                baseEvent(UiEvent.Toast.Normal("파일 업로드 중..."))
-
-                // 3) 서버 업로드
-                val result = pdfJoinUseCase(filePart)  // invoke 연산자를 통한 호출
-
-                result.fold(
-                    onSuccess = { response ->
-                        _uploadResponse.value = response
-                        // 업로드 성공 토스트 표시
-                        baseEvent(UiEvent.Toast.Success("파일 '$fileName' 업로드가 완료되었습니다."))
-                    },
-                    onFailure = { exception ->
-                        // 업로드 실패 토스트 표시
-                        val errorMsg = exception.message ?: "알 수 없는 오류가 발생했습니다."
-                        baseEvent(UiEvent.Toast.Normal("업로드 실패: $errorMsg"))
-                    }
-                )
-
-                // 임시 파일 삭제
-                withContext(Dispatchers.IO) {
-                    if (file.exists()) {
-                        file.delete()
-                    }
-                }
+                Log.d(TAG, "네비게이션 이벤트 발행: $event")
+                _navigationEvent.emit(event)
             } catch (e: Exception) {
-                // 예외 상황 (네트워크 오류 등) 토스트 표시
-                val errorMsg = e.message ?: "알 수 없는 오류가 발생했습니다."
-                baseEvent(UiEvent.Toast.Normal("오류 발생: $errorMsg"))
-            } finally {
-                // 로딩 종료
-                baseEvent(UiEvent.Loading.Hide)
+                Log.e(TAG, "네비게이션 이벤트 발행 실패: ${e.message}", e)
             }
         }
     }
 
-    /**
-     * Uri 확장 함수로 File 변환 기능 제공
-     */
-    private fun Uri.toFile(context: Context, fileName: String): File {
-        val tempFile = File(context.cacheDir, fileName)
-        context.contentResolver.openInputStream(this)?.use { input ->
-            FileOutputStream(tempFile).use { output ->
-                input.copyTo(output)
-            }
-        }
-        return tempFile
+    fun navigateToPdfUpload() {
+        navigateToPdfViewer()
     }
+
+    fun navigateToPdfViewer(bookId: String? = null) {
+        emitNavigation(Navigation.ToPdfViewer(bookId))
+    }
+
+    fun navigateToPdfChapter(pdfId: Long) {
+        emitNavigation(Navigation.ToPdfChapter(pdfId))
+    }
+
+    fun setSelectedFileUri(uri: Uri?, name: String?) {
+        _selectedFileUri.value = uri
+        _selectedFileName.value = name
+        Log.d(TAG, "파일 선택: ${name ?: "없음"}")
+    }
+
+    fun setUploading(uploading: Boolean) {
+        _isUploading.value = uploading
+        if (uploading) {
+            showLoading()
+        } else {
+            hideLoading()
+        }
+        Log.d(TAG, "업로드 상태 변경: $uploading (로딩 다이얼로그 ${if(uploading) "표시" else "숨김"})")
+    }
+
 }
