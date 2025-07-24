@@ -1,16 +1,13 @@
-package com.yju.domain.pdf.model
+package com.yju.data.pdf.dto.response
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class PdfUploadModel(
-    @SerialName("pk")
-    val id : Long,
-
-    @SerialName("number")
-    val number: Int,
+data class PdfKanjiDetailResponse (
+    @SerialName("vocabulary_book_order")
+    val vocabularyBookOrder: Int,
 
     @SerialName("kanji")
     val kanji: String,
@@ -22,5 +19,8 @@ data class PdfUploadModel(
     val means: String,
 
     @SerialName("level")
-    val level: String
+    val level: String,
+
+    @SerialName("page")
+    val page: Int
 )
