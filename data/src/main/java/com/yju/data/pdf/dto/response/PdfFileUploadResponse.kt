@@ -5,22 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PdfFileUploadResponse(
-
-    @SerialName("pk")
-    val id : Long,
-
-    @SerialName("number")
-    val number: Int,
-
-    @SerialName("kanji")
-    val kanji: String,
-
-    @SerialName("furigana")
-    val furigana: String,
-
-    @SerialName("means")
-    val means: String,
-
-    @SerialName("level")
-    val level: String
+    @SerialName("book_name")
+    val bookName: String,
+    @SerialName("file_name")
+    val word: List<PdfKanjiDetailResponse>
 )
