@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/layout/layout_audio_wave.xml -->
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/audioWaveContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp"
+    android:background="@drawable/bg_audio_wave_container">
+
+
+    <!-- 재생 시간 표시 -->
+    <TextView
+        android:id="@+id/tvAudioDuration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textColor="#1A73E8"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif-medium"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="01:10" />
+
+    <!-- 오디오 웨이브 시각화 -->
+    <com.yju.presentation.view.speech.AudioWaveView
+        android:id="@+id/audioWaveView"
+        android:layout_width="0dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/tvAudioDuration"
+        app:layout_constraintTop_toTopOf="parent"
+        app:waveColor="#CCCCCC"
+        app:waveProgressColor="#1A73E8"
+        app:waveCount="10"
+        app:waveHeight="24dp"
+        app:waveWidth="3dp"
+        app:waveGap="2dp"
+        app:randomizeHeights="true" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

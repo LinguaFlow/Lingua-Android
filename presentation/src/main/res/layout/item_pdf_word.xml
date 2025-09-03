@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View" />
+        <variable
+            name="vm"
+            type="com.yju.domain.kanji.model.KanjiDetailModel" />
+        <variable
+            name="eventHolder"
+            type="com.yju.presentation.view.pdf.adapter.PdfWordAdapter.WordViewHolder" />
+        <variable
+            name="position"
+            type="Integer" />
+        <variable
+            name="selectionMode"
+            type="Boolean" />
+        <variable
+            name="selected"
+            type="Boolean" />
+    </data>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:padding="16dp">
+
+            <!-- 체크박스 (선택 모드에서만 표시) -->
+            <CheckBox
+                android:id="@+id/checkBox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="@{selected}"
+                android:visibility="@{selectionMode ? View.VISIBLE : View.GONE}"
+                app:layout_constraintBottom_toBottomOf="@id/tvJapaneseWord"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
+
+            <!-- 일본어 단어 (한자) -->
+            <TextView
+                android:id="@+id/tvJapaneseWord"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@{vm.kanji}"
+                android:textColor="#333333"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@+id/checkBox"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="女房" />
+
+            <!-- 읽는 법 (후리가나) - 단어 옆으로 이동 -->
+            <TextView
+                android:id="@+id/tvReading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text='@{"【" + vm.furigana + "】"}'
+                android:textColor="#666666"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="@+id/tvJapaneseWord"
+                app:layout_constraintStart_toEndOf="@+id/tvJapaneseWord"
+                app:layout_constraintTop_toTopOf="@+id/tvJapaneseWord"
+                tools:text="【にょうぼう】" />
+
+            <!-- 레벨 (N1~N5) 또는 품사 - 접근성 문제 해결 -->
+            <TextView
+                android:id="@+id/tvPartOfSpeech"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="#1E8449"
+                android:paddingStart="8dp"
+                android:paddingTop="4dp"
+                android:paddingEnd="8dp"
+                android:paddingBottom="4dp"
+                android:gravity="center"
+                android:text="@{vm.level}"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="N2" />
+
+            <!-- 의미 (한국어) -->
+            <TextView
+                android:id="@+id/tvMeaning"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text='@{vm.means}'
+                android:textColor="#333333"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/checkBox"
+                app:layout_constraintTop_toBottomOf="@+id/tvJapaneseWord"
+                tools:text="아내" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+</layout>

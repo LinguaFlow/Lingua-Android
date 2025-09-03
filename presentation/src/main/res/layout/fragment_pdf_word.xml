@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="vm"
+            type="com.yju.presentation.view.pdf.word.PdfWordViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/background_light"
+        tools:context=".view.pdf.word.PdfWordFragment">
+
+        <!-- 헤더 부분 - 수정된 방식으로 구현 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/toolbarLayout"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:background="@color/background_white"
+            android:elevation="@dimen/elevation_small"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <!-- 뒤로가기 버튼 - 수정된 방식으로 구현 -->
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:onClick="@{() -> vm.onClickBack()}"
+                android:padding="12dp"
+                android:src="@drawable/ic_back"
+                android:contentDescription="@string/content_desc_back_button"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 제목 - 수정된 방식으로 구현 -->
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvChapterTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="@dimen/text_size_large"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Chapter 1 ~ 10" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 리사이클러뷰 - 상위 레이아웃 참조 수정 -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvWords"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:clipToPadding="false"
+            android:padding="@dimen/padding_small"
+            android:scrollbars="vertical"
+            android:scrollbarStyle="outsideOverlay"
+            app:layout_constraintBottom_toTopOf="@+id/selectionModeContainer"
+            app:layout_constraintTop_toBottomOf="@+id/toolbarLayout"
+            tools:listitem="@layout/item_pdf_word" />
+
+        <!-- 데이터 없음 메시지 -->
+        <TextView
+            android:id="@+id/tvEmptyMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="@dimen/padding_medium"
+            android:text="@string/msg_no_words"
+            android:textSize="@dimen/text_size_medium"
+            android:visibility="gone"
+            android:textColor="@color/text_secondary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+        <!-- 선택 모드 컨테이너 -->
+        <LinearLayout
+            android:id="@+id/selectionModeContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:gravity="center"
+            android:elevation="4dp"
+            android:background="#FFFFFF"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:visibility="visible">
+
+            <!-- 전체 선택 버튼 -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSelectAll"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:text="전체"
+                android:textSize="14sp"
+                android:textColor="#757575"
+                android:layout_marginEnd="4dp"
+                app:rippleColor="#33000000"
+                app:cornerRadius="8dp"
+                style="@style/Widget.MaterialComponents.Button.TextButton" />
+
+            <!-- 선택 해제 버튼 -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnClearSelection"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:text="해제"
+                android:textSize="14sp"
+                android:textColor="#757575"
+                android:layout_marginEnd="4dp"
+                app:rippleColor="#33000000"
+                app:cornerRadius="8dp"
+                style="@style/Widget.MaterialComponents.Button.TextButton" />
+
+            <!-- 모르는 단어로 이동 버튼 -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnMoveToUnknown"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1.5"
+                android:text="아는 단어로 이동"
+                android:textSize="14sp"
+                android:textColor="#FFFFFF"
+                android:layout_marginEnd="4dp"
+                app:backgroundTint="#3F51B5"
+                app:cornerRadius="8dp"
+                style="@style/Widget.MaterialComponents.Button.UnelevatedButton" />
+
+            <!-- 취소 버튼 -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCancel"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:text="취소"
+                android:textSize="14sp"
+                android:textColor="#757575"
+                app:strokeColor="#757575"
+                app:cornerRadius="8dp"
+                app:rippleColor="#33000000"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+        </LinearLayout>
+
+        <!-- 로딩 인디케이터 -->
+        <FrameLayout
+            android:id="@+id/loadingContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/background_semi_transparent"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center" />
+        </FrameLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

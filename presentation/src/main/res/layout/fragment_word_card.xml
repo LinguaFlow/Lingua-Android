@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View" />
+        <variable
+            name="word"
+            type="com.yju.domain.kanji.model.KanjiDetailModel" />
+        <variable
+            name="vm"
+            type="com.yju.presentation.view.quiz.card.WordCardViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginHorizontal="16dp">
+
+        <!-- 오디오 컨트롤 영역 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/audioControlContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="@{vm.isAudioControlVisible ? View.VISIBLE : View.GONE}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <!-- 재생 버튼 -->
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/btnPlay"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="발음 재생"
+                android:onClick="@{() -> vm.onPlayAudio()}"
+                android:padding="4dp"
+                android:scaleType="fitCenter"
+                android:selected="@{vm.isPlaying}"
+                android:src="@drawable/audio_button_selector"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 오디오 시각화 영역 -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/audioVisualizerContainer"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="8dp"
+                android:visibility="@{vm.isPlaying ? View.VISIBLE : View.GONE}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnPlay">
+
+                <include
+                    android:id="@+id/audioVisualizer"
+                    layout="@layout/layout_audio_wave"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 한자 카드 -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardKanji"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
+            app:layout_constraintBottom_toTopOf="@id/cardExample"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="@{vm.isAudioControlVisible ? 0.35f : 0.4f}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/audioControlContainer"
+            app:rippleColor="#33000000"
+            app:strokeColor="#E0E0E0"
+            app:strokeWidth="1dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="16dp">
+
+                <!-- 위치 표시 -->
+                <TextView
+                    android:id="@+id/tvPosition"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text='@{vm.totalCount > 1 ? (vm.position + 1) + " / " + vm.totalCount : ""}'
+                    android:textColor="#888888"
+                    android:textSize="14sp"
+                    android:visibility="@{vm.totalCount > 1 ? View.VISIBLE : View.GONE}"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="1 / 10" />
+
+                <!-- 한자 표시 -->
+                <TextView
+                    android:id="@+id/tvKanji"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@{word.kanji}"
+                    android:textColor="#212121"
+                    android:textSize="@{vm.isAudioControlVisible ? @dimen/kanji_text_size_small : @dimen/kanji_text_size_normal}"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toTopOf="@id/tvFurigana"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_chainStyle="packed"
+                    tools:text="一形容詞" />
+
+                <!-- 발음 표시 -->
+                <TextView
+                    android:id="@+id/tvFurigana"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@{word.furigana}"
+                    android:textColor="#666666"
+                    android:textSize="@{vm.isAudioControlVisible ? @dimen/furigana_text_size_small : @dimen/furigana_text_size_normal}"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvKanji"
+                    tools:text="いちけいようし" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 예문 카드 - 단순화된 버전 -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardExample"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cardKanji"
+            app:rippleColor="#33000000"
+            app:strokeWidth="0dp">
+
+            <TextView
+                android:id="@+id/btnExample"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackground"
+                android:gravity="center"
+                android:onClick="@{() -> vm.onShowExample()}"
+                android:padding="16dp"
+                android:text="예문 보기"
+                android:textColor="#212121"
+                android:textSize="24sp" />
+        </com.google.android.material.card.MaterialCardView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

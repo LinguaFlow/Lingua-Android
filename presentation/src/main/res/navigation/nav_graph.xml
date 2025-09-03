@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/pdfViewerFragment">
+
+    <!-- PDF Viewer Fragment (Entry Point) -->
+    <fragment
+        android:id="@+id/pdfViewerFragment"
+        android:name="com.yju.presentation.view.pdf.upload.PdfViewerFragment"
+        android:label="PDF Viewer">
+        <action
+            android:id="@+id/action_to_pdfChapterFragment"
+            app:destination="@id/pdfChapterFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <argument
+            android:name="book_id"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
+
+    <!-- PDF Chapter Fragment -->
+    <fragment
+        android:id="@+id/pdfChapterFragment"
+        android:name="com.yju.presentation.view.pdf.chapter.PdfChapterFragment"
+        android:label="PDF Chapters">
+        <action
+            android:id="@+id/action_to_pdfWordFragment"
+            app:destination="@id/pdfWordFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_to_knownWordFragment"
+            app:destination="@id/knownWordFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <argument
+            android:name="pdf_id"
+            app:argType="long" />
+    </fragment>
+
+    <!-- PDF Word Fragment -->
+    <fragment
+        android:id="@+id/pdfWordFragment"
+        android:name="com.yju.presentation.view.pdf.word.PdfWordFragment"
+        android:label="PDF Words">
+        <argument
+            android:name="pdf_id"
+            app:argType="long" />
+        <argument
+            android:name="chapter_title"
+            app:argType="string" />
+        <argument
+            android:name="is_known"
+            app:argType="boolean"
+            android:defaultValue="false" />
+    </fragment>
+
+    <!-- Known Word Fragment -->
+    <fragment
+        android:id="@+id/knownWordFragment"
+        android:name="com.yju.presentation.view.pdf.known.KnownWordFragment"
+        android:label="Known Words">
+        <argument
+            android:name="pdf_id"
+            app:argType="long" />
+        <argument
+            android:name="unknown_words"
+            app:argType="com.yju.domain.kanji.model.KanjiDetailModel[]" />
+    </fragment>
+</navigation>

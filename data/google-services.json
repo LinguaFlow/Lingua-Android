@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "336892074314",
+    "project_id": "lingua-c91ad",
+    "storage_bucket": "lingua-c91ad.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:336892074314:android:1450f4b3781c94afb449b3",
+        "android_client_info": {
+          "package_name": "com.yju.data"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDfUJ7SPWyqr2Lbvj6sTkDUIJkVlPOvM1U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:336892074314:android:43a5b7ab4e483f3db449b3",
+        "android_client_info": {
+          "package_name": "com.yju.presentation"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDfUJ7SPWyqr2Lbvj6sTkDUIJkVlPOvM1U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

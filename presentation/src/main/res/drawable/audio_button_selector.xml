@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 재생 중일 때(뷰의 isSelected == true) -->
+    <item android:drawable="@drawable/ic_free_icon_stop_8421088"
+        android:state_selected="true" />
+    <!-- 기본(재생 전) -->
+    <item android:drawable="@drawable/ic_free_icon_play_8421019" />
+</selector>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/values/attrs.xml -->
+<resources>
+    <declare-styleable name="AudioWaveView">
+        <attr name="waveColor" format="color" />
+        <attr name="waveProgressColor" format="color" />
+        <attr name="waveCount" format="integer" />
+        <attr name="waveWidth" format="dimension" />
+        <attr name="waveHeight" format="dimension" />
+        <attr name="waveGap" format="dimension" />
+        <attr name="randomizeHeights" format="boolean" />
+    </declare-styleable>
+</resources>

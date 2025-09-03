@@ -1,0 +1,91 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View" />
+        <variable
+            name="vm"
+            type="com.yju.domain.kanji.model.KanjiModel" />
+        <variable
+            name="eventHolder"
+            type="com.yju.presentation.view.pdf.adapter.PdfListAdapter.EventHandler" />
+    </data>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/card_margin_vertical"
+        android:layout_marginHorizontal="@dimen/card_margin_horizontal"
+        app:cardCornerRadius="@dimen/card_corner_radius"
+        app:cardElevation="0dp"
+        android:onClick="@{() -> eventHolder.onViewClick(vm.id)}">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFFFFF"
+            android:padding="@dimen/content_padding">
+
+            <!-- PDF 아이콘 - 화면 비율 기반 크기 지정 -->
+            <ImageView
+                android:id="@+id/ivIcon"
+                android:layout_width="@dimen/pdf_icon_size"
+                android:layout_height="0dp"
+                android:layout_marginStart="4dp"
+                android:src="@drawable/ic_free_icon_pdf"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintBottom_toBottomOf="@id/tvTimeInfo"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tvTitle" />
+
+            <!-- 제목 영역 - 자동 크기 조정 적용 -->
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/text_margin_start"
+                android:layout_marginEnd="8dp"
+                android:text="@{vm.bookName}"
+                android:textColor="#000000"
+                android:textSize="@dimen/pdf_title_text_size"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"
+                app:layout_constraintEnd_toStartOf="@id/btnDelete"
+                app:layout_constraintStart_toEndOf="@id/ivIcon"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 시간 및 상태 표시 -->
+            <TextView
+                android:id="@+id/tvTimeInfo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="@dimen/text_margin_start"
+                android:layout_marginEnd="8dp"
+                android:textColor="#999999"
+                android:textSize="@dimen/pdf_time_text_size"
+                android:text="4.4 금 오후 9:18 · PDF 단어장"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/ivIcon"
+                app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+
+            <!-- 삭제 버튼 - 화면 크기에 맞게 조정 -->
+            <ImageButton
+                android:id="@+id/btnDelete"
+                android:layout_width="@dimen/pdf_delete_button_size"
+                android:layout_height="@dimen/pdf_delete_button_size"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="삭제"
+                android:onClick="@{() -> eventHolder.onDeleteClick(vm.id)}"
+                android:padding="4dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_delete"
+                android:visibility="@{eventHolder.deleteMode() ? View.VISIBLE : View.GONE}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+</layout>

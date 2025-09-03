@@ -1,0 +1,89 @@
+plugins {
+    id 'com.android.library'  // Add this line - this is required before using safeargs
+    id 'org.jetbrains.kotlin.android'
+    id 'androidx.navigation.safeargs.kotlin'
+    id 'kotlin-kapt'
+    id 'kotlin-parcelize'
+    id 'org.jetbrains.kotlin.plugin.serialization'
+//    alias(libs.plugins.google.gms.google.services)
+}
+
+android {
+    namespace 'com.yju.domain'
+    compileSdk 35
+
+    defaultConfig {
+        // Remove applicationId as this is a library module
+        minSdk 24
+        targetSdk 34
+
+        // These can stay if you need them for your library
+        versionCode 1
+        versionName "1.0"
+
+        buildConfigField "String", "BASE_URL", "\"https://linguaflow.store/\""
+
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+        freeCompilerArgs += ['-opt-in=kotlin.RequiresOptIn']
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+}
+
+kapt {
+    correctErrorTypes = true
+}
+
+dependencies {
+    // Core Android dependencies
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.appcompat
+    implementation libs.material
+    implementation libs.androidx.activity
+    implementation libs.androidx.constraintlayout
+
+    implementation 'com.squareup.retrofit2:converter-scalars:2.9.0'
+
+    // Dependency Injection
+    implementation "com.google.dagger:hilt-android:2.51.1"
+    implementation libs.firebase.auth
+    implementation libs.androidx.credentials
+    implementation libs.androidx.credentials.play.services.auth
+    implementation libs.googleid
+//    implementation libs.transportation.consumer
+    kapt "com.google.dagger:hilt-compiler:2.51.1"
+
+    // Networking
+    implementation libs.jakewharton.retrofit2.kotlinx.serialization.converter
+    def retrofit_version = "2.9.0"
+    def okhttp_version = "4.12.0"
+    implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
+    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3"
+
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.1.5"  // 이미 추가되어 있음
+
+    implementation "com.jakewharton.timber:timber:5.0.1"
+
+    // Testing
+    testImplementation libs.junit
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0"
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.espresso.core
+}

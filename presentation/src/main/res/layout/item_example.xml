@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <!-- 데이터 바인딩을 위한 변수 추가 -->
+        <variable
+            name="vm"
+            type="com.yju.domain.known.model.TranslationExampleModel" />
+
+        <variable
+            name="eventHolder"
+            type="com.yju.presentation.view.pdf.adapter.ExampleAdapter.ExampleEventHandler" />
+
+        <variable
+            name="position"
+            type="Integer" />
+
+        <variable
+            name="isPlaying"
+            type="Boolean" />
+    </data>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardExample"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginVertical="8dp"
+        android:onClick="@{() -> eventHolder.onItemClick(position)}"
+        app:cardBackgroundColor="#FFFFFF"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp"
+        app:strokeColor="@color/colorPrimary"
+        app:strokeWidth="@{eventHolder.isSelected(position) ? 2 : 0}"
+        app:contentPadding="16dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- 예문 제목 및 인덱스 -->
+            <TextView
+                android:id="@+id/tvExampleTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="예문"
+                android:textColor="#212121"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 예문 인덱스 -->
+            <TextView
+                android:id="@+id/tvExampleIndex"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@{@string/example_index_format(position + 1, eventHolder.getTotalCount())}"
+                android:textColor="#666666"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="@id/tvExampleTitle"
+                app:layout_constraintStart_toEndOf="@id/tvExampleTitle"
+                app:layout_constraintTop_toTopOf="@id/tvExampleTitle"
+                tools:text="1/5" />
+
+            <!-- 재생 버튼 -->
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/btnPlay"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="발음 재생"
+                android:onClick="@{() -> eventHolder.onPlayClick(vm.japanese)}"
+                android:padding="2dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/audio_button_selector"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 예문 내용 -->
+            <TextView
+                android:id="@+id/tvJapanese"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@{vm.japanese}"
+                android:textColor="#333333"
+                android:textSize="15sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvExampleTitle"
+                tools:text="今日は、私はパンを食べる。 私は、学生です。" />
+
+            <!-- 구분선 -->
+            <View
+                android:id="@+id/divider"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="12dp"
+                android:background="#E0E0E0"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvJapanese" />
+
+            <!-- 예문 해석 타이틀 -->
+            <TextView
+                android:id="@+id/tvTranslationTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="해석"
+                android:textColor="#666666"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/divider" />
+
+            <!-- 예문 해석 -->
+            <TextView
+                android:id="@+id/tvKorean"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@{vm.korean}"
+                android:textColor="#333333"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvTranslationTitle"
+                tools:text="오늘은, 나(私)는 빵(パン)을 먹(食べ)습니다. 나는 학생(学生)입니다." />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+</layout>
