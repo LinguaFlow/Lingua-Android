@@ -51,7 +51,6 @@ class LoginActivity : BaseActivity<ActivityLoginBinding, LoginViewModel>(R.layou
      * 소셜 로그인 SDK 초기화
      */
     private fun initializeSocialSDKs() {
-        // 네이버 로그인 SDK 초기화
         NaverIdLoginSDK.initialize(
             this,
             BuildConfig.NAVER_CLIENT_ID,
@@ -131,7 +130,6 @@ class LoginActivity : BaseActivity<ActivityLoginBinding, LoginViewModel>(R.layou
             }
         }
 
-        // 카카오톡이 설치되어 있으면 카카오톡으로 로그인, 아니면 카카오계정으로 로그인
         if (UserApiClient.instance.isKakaoTalkLoginAvailable(this)) {
             UserApiClient.instance.loginWithKakaoTalk(this) { token, error ->
                 if (error != null) {
@@ -141,7 +139,6 @@ class LoginActivity : BaseActivity<ActivityLoginBinding, LoginViewModel>(R.layou
                         return@loginWithKakaoTalk
                     }
 
-                    // 카카오톡에 연결된 카카오계정이 없는 경우, 카카오계정으로 로그인 시도
                     UserApiClient.instance.loginWithKakaoAccount(this, callback = callback)
                 } else if (token != null) {
                     fetchKakaoUserInfo(token)
