@@ -44,7 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="일본어 학습의 새로운 시작"
+            android:text="단어 학습의 새로운 시작"
             android:textColor="@color/gray_600"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -109,19 +109,5 @@
                 android:textStyle="bold" />
 
         </LinearLayout>
-
-        <!-- 하단 정보 텍스트 -->
-        <TextView
-            android:id="@+id/tv_footer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:text="© 2025 LinguaFlow"
-            android:textColor="@color/gray_400"
-            android:textSize="12sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
