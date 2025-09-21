@@ -56,14 +56,10 @@ class KnownWordChapterViewModel @Inject constructor() : BaseViewModel() {
         generateChapters(words.size)
     }
 
-    /**
-     * ✅ 챕터 생성 - 간소화
-     */
     private fun generateChapters(totalWords: Int) {
         val chapters = if (totalWords <= 0) {
             emptyList()
         } else {
-            // 최소 1개 페이지는 생성
             val pageCount = ((totalWords - 1) / PAGE_SIZE + 1).coerceAtLeast(1)
             List(pageCount) { index -> "K:${index + 1}" }
         }

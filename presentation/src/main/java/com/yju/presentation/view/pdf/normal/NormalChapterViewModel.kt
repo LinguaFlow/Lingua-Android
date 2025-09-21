@@ -84,8 +84,7 @@ class NormalChapterViewModel @Inject constructor() : BaseViewModel() {
                 updateChapters(emptyList(), emptyMap())
                 return@withContext
             }
-
-            // ✅ 캐시 확인 - 동일한 단어 수면 기존 챕터 재사용
+            
             if (cachedPdfInfo?.word?.size == totalWords && cachedChapters.isNotEmpty()) {
                 Log.d(TAG, "캐시된 챕터 재사용")
                 withContext(Dispatchers.Main) {

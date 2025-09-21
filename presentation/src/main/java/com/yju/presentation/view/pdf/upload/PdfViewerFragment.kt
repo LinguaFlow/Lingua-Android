@@ -50,10 +50,18 @@ class PdfViewerFragment : BaseFragment<FragmentPdfViewerBinding, PdfViewerViewMo
     }
 
     override fun onDestroyView() {
+        viewModel.cancelAllUploadTasks()
+        uploader.cleanup()
         cleanupResources()
         super.onDestroyView()
     }
 
+    override fun onPause() {
+        super.onPause()
+        if (isRemoving || requireActivity().isFinishing) {
+            viewModel.cancelAllUploadTasks()
+        }
+    }
     private fun setupActivityResultLaunchers() {
         // PDF 파일 선택 런처
         pickPdfLauncher = registerForActivityResult(
@@ -80,6 +88,7 @@ class PdfViewerFragment : BaseFragment<FragmentPdfViewerBinding, PdfViewerViewMo
     private fun initializeUploadDelegate() {
         uploader = UploadPdfDelegate(
             owner = this,
+            cancelUploadUseCase = viewModel.getCancelUploadUseCase(),
             asyncUpload = viewModel.getAsyncUploadUseCase(),
             installKanji = viewModel.getInstallKanjiUseCase(),
             coroutineScope = lifecycleScope,
@@ -96,11 +105,15 @@ class PdfViewerFragment : BaseFragment<FragmentPdfViewerBinding, PdfViewerViewMo
                 hideUploadCancelDialog()
                 viewModel.handleUploadSuccess()
                 activityViewModel.setUploading(false)
+                viewModel.setSelectedFile(null, null)
+                activityViewModel.setSelectedFileUri(null, null)
             },
             onUploadFailed = { message ->
                 hideUploadCancelDialog()
                 viewModel.handleUploadError(message)
                 activityViewModel.setUploading(false)
+                viewModel.setSelectedFile(null, null)
+                activityViewModel.setSelectedFileUri(null, null)
             },
             pickPdfLauncher = pickPdfLauncher,
             permLauncher = permLauncher
@@ -113,6 +126,9 @@ class PdfViewerFragment : BaseFragment<FragmentPdfViewerBinding, PdfViewerViewMo
         uploadCancelDialog.show(
             onCancel = {
                 uploader.cancelUpload()
+                // 취소 시 파일 선택 초기화
+                viewModel.setSelectedFile(null, null)
+                activityViewModel.setSelectedFileUri(null, null)
             }
         )
     }
@@ -189,10 +205,8 @@ class PdfViewerFragment : BaseFragment<FragmentPdfViewerBinding, PdfViewerViewMo
 
     private fun observeNavigationEvents() {
         repeatOnStarted {
-            viewModel.onDeleteCompleted.collect { completed ->
-                if (completed) {
-                    activityViewModel.navigateToPdfUpload()
-                }
+            viewModel.onClickNavigateToChapter.collect { pdfId ->
+                activityViewModel.navigateToPdfChapter(pdfId)
             }
         }
 

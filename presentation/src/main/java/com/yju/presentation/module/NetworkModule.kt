@@ -5,6 +5,7 @@ import com.yju.data.auth.util.HeaderInterceptor
 import com.yju.domain.auth.util.AuthInterceptor
 
 import com.yju.domain.auth.util.SharedPreferenceUtil
+import com.yju.domain.util.WebSocketManager
 import com.yju.presentation.util.CustomCallAdapterFactory
 import dagger.Module
 import dagger.Provides
@@ -55,9 +56,8 @@ object NetworkModule {
     fun provideJsonConfiguration(): Json {
         return Json {
             isLenient = true
-            ignoreUnknownKeys = true // 지정되지 않은 key 값은 무시
-            coerceInputValues = true // default 값 설정
-            explicitNulls = false // 없는 필드는 null로 설정
+            ignoreUnknownKeys = true
+            coerceInputValues = true
         }
     }
 
@@ -69,9 +69,21 @@ object NetworkModule {
         return Retrofit.Builder()
             .client(okHttpClient)
 //            .baseUrl("https://linguaflow.store/")
-            .baseUrl("http://192.168.1.101:8080/")
+            .baseUrl("http://192.168.1.100:8080/")
             .addCallAdapterFactory(CustomCallAdapterFactory())
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()
+    }
+    @Provides
+    @Singleton
+    fun provideWebSocketManager(
+        okHttpClient: OkHttpClient
+    ): WebSocketManager {
+        return WebSocketManager(
+            okHttpClient = okHttpClient,
+//            baseUrl = "https://linguaflow.store/",
+            baseUrl = "http://192.168.1.100:8080/"
+
+        )
     }
 }

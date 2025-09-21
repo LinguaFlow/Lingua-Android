@@ -1,6 +1,5 @@
 package com.yju.domain.auth.util
 
-import com.yju.domain.BuildConfig
 import com.yju.domain.auth.model.TokenInfo
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -16,12 +15,9 @@ import javax.inject.Inject
 class AuthInterceptor @Inject constructor(
     private val prefs: SharedPreferenceUtil
 ) : okhttp3.Authenticator {
-
-    // 세션 만료 상태 관리 (스레드 안전)
     private val isSessionExpired = AtomicBoolean(false)
 
     override fun authenticate(route: Route?, response: Response): Request? {
-        Timber.d("============ AuthInterceptor 호출됨 ============")
         Timber.d("응답 코드: ${response.code}")
         Timber.d("요청 URL: ${response.request.url}")
 
@@ -90,7 +86,7 @@ class AuthInterceptor @Inject constructor(
 
         return Request.Builder()
 //            .url("${BuildConfig.BASE_URL}api/v1/auth/reissue-token")
-            .url("http://192.168.1.101:8080/api/v1/auth/reissue-token")
+            .url("http://192.168.1.100:8080/api/v1/auth/reissue-token")
             .post(requestBody.toRequestBody("text/plain".toMediaTypeOrNull()))
             .build()
     }
@@ -164,14 +160,5 @@ class AuthInterceptor @Inject constructor(
     fun resetSessionExpiredFlag() {
         isSessionExpired.set(false)
         Timber.d("세션 만료 플래그 리셋")
-    }
-
-    fun isSessionExpired(): Boolean {
-        return isSessionExpired.get()
-    }
-
-    fun logout() {
-        clearTokens()
-        Timber.d("수동 로그아웃 처리")
     }
 }

@@ -2,7 +2,8 @@ package com.yju.domain.pdf.model
 
 enum class UploadTaskStatus(val status: String) {
     PENDING("PENDING"),
-    PROCESSING("PROCESSING"),
+
+    CANCELLED("CANCELLED"),
     DONE("DONE"),
     FAILED("FAILED");
 

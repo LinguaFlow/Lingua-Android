@@ -3,6 +3,8 @@ package com.yju.presentation.view.pdf.chapter
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
@@ -47,15 +49,27 @@ class PdfChapterFragment :
 
         currentPdfId = arguments?.getLong("pdf_id", 0L) ?: 0L
 
+        ViewCompat.setOnApplyWindowInsetsListener(binding.appBarLayout) { view, insets ->
+            val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            view.setPadding(
+                view.paddingLeft,
+                statusBarHeight,
+                view.paddingRight,
+                view.paddingBottom
+            )
+            insets
+        }
+
+        ViewCompat.requestApplyInsets(binding.root)
         if (!isInitialized && currentPdfId > 0) {
             initializeCore()
             setupUI()
             setupObservers()
             isInitialized = true
-            // ✅ 중요: loadKnown을 true로 변경하여 모든 데이터 로드
             loadInitialData(loadKnown = true)
         }
     }
+
     private fun initializeCore() {
         viewModel.setCurrentPdfId(currentPdfId)
     }
