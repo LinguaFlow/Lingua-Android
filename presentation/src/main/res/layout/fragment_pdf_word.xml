@@ -13,12 +13,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/background_light"
+        android:fitsSystemWindows="true"
         tools:context=".view.pdf.word.PdfWordFragment">
 
         <!-- 헤더 부분 - 수정된 방식으로 구현 -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/toolbarLayout"
             android:layout_width="0dp"
+
             android:layout_height="56dp"
             android:background="@color/background_white"
             android:elevation="@dimen/elevation_small"

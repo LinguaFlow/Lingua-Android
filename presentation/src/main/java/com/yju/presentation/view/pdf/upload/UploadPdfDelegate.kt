@@ -13,10 +13,12 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.yju.domain.kanji.usecase.SaveKanjiVocabularyUseCase
 import com.yju.domain.pdf.model.PdfModel
 import com.yju.domain.pdf.model.UploadTaskStatus
 import com.yju.domain.pdf.usecase.AsyncUploadVocabularyPdfUseCase
+import com.yju.domain.pdf.usecase.CancelUploadUseCase
 import com.yju.domain.util.AsyncUploadState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -33,6 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class UploadPdfDelegate(
     private val owner: Fragment,
+    private val cancelUploadUseCase: CancelUploadUseCase,
     private val asyncUpload: AsyncUploadVocabularyPdfUseCase,
     private val installKanji: SaveKanjiVocabularyUseCase,
     private val coroutineScope: CoroutineScope,
@@ -49,23 +52,21 @@ class UploadPdfDelegate(
         private const val TAG = "UploadPdfDelegate"
         const val PDF_MIME_TYPE = "application/pdf"
         const val DEFAULT_FILENAME = "unknown.pdf"
-
-        // 권한이 필요한 Android 버전 범위
         private val PERMISSION_REQUIRED_VERSIONS = 23..28
     }
-
-    // Context는 필요할 때마다 가져오기 (메모리 누수 방지)
     private val context get() = owner.requireContext()
-
-    // 현재 업로드 상태
+    private var currentTaskId: Long? = null
     private var currentUploadUri: Uri? = null
     private var currentUploadName: String = ""
     private var uploadJob: Job? = null
     private val isCancelled = AtomicBoolean(false)
 
     override fun onDestroy(owner: LifecycleOwner) {
-        Log.d(TAG, "UploadPdfDelegate 생명주기 종료")
-        cleanup()
+        try {
+            cleanup()
+        } catch (e: Exception) {
+            Log.e(TAG, "onDestroy cleanup error: ${e.message}")
+        }
         super.onDestroy(owner)
     }
 
@@ -110,12 +111,28 @@ class UploadPdfDelegate(
     }
 
     fun cancelUpload() {
-        Log.d(TAG, "업로드 취소 요청")
+        Log.d(TAG, "업로드 취소 요청 - Task ID: $currentTaskId")
 
+        val taskIdToCancel = currentTaskId
         isCancelled.set(true)
         cancelCurrentUpload()
 
-        onUploadFailed("업로드가 사용자에 의해 취소되었습니다")
+        // 서버에 취소 요청
+        taskIdToCancel?.let { taskId ->
+            owner.lifecycleScope.launch {
+                cancelUploadUseCase.invoke(taskId)
+                    .onSuccess {
+                        Log.d(TAG, "서버 취소 성공")
+                    }
+                    .onFailure { error ->
+                        Log.e(TAG, "서버 취소 실패: ${error.message}")
+                    }
+            }
+        }
+
+        // 상태 초기화 및 콜백 호출
+        resetUploadState()
+        onUploadFailed("업로드가 취소되었습니다")
     }
 
     fun handleSelectedFile(uri: Uri) {
@@ -155,20 +172,10 @@ class UploadPdfDelegate(
     }
 
     fun cleanup() {
-        Log.d(TAG, "리소스 정리 시작")
-
-        // 업로드 작업 취소
         cancelCurrentUpload()
-
-        // 상태 초기화
         resetUploadState()
-
-        Log.d(TAG, "리소스 정리 완료")
     }
 
-    /**
-     * 권한 확인 후 업로드 진행
-     */
     private fun checkPermissionAndUpload(uri: Uri, name: String) {
         val needPermission = Build.VERSION.SDK_INT in PERMISSION_REQUIRED_VERSIONS &&
                 ContextCompat.checkSelfPermission(
@@ -197,20 +204,16 @@ class UploadPdfDelegate(
 
         uploadJob = coroutineScope.launch {
             try {
-                // 취소 확인
                 if (isCancelled.get()) {
                     Log.d(TAG, "업로드 시작 전 취소됨")
                     return@launch
                 }
 
-                // MultipartBody.Part 생성
                 val part = MultipartBody.Part.createFormData(
                     "file", name, uri.asPdfRequestBody(context.contentResolver)
                 )
 
-                // 업로드 실행 및 상태 모니터링
                 asyncUpload(part).collectLatest { state ->
-                    // 취소 확인
                     if (isCancelled.get()) {
                         Log.d(TAG, "업로드 중 취소됨")
                         return@collectLatest
@@ -255,13 +258,15 @@ class UploadPdfDelegate(
             }
 
             is AsyncUploadState.Submitted -> {
-                Log.d(TAG, "업로드 제출 완료 - 대기 중")
+                Log.d(TAG, "업로드 제출 완료 - Task ID: ${state.taskId}")
+                currentTaskId = state.taskId  // Task ID 저장
                 onProcessing(UploadTaskStatus.PENDING)
             }
 
             is AsyncUploadState.Success -> {
-                Log.d(TAG, "업로드 성공: ${state.result.bookName}")
                 handleUploadSuccess(state.result)
+                uploadJob?.cancel()
+                uploadJob = null
             }
 
             is AsyncUploadState.Error -> {
@@ -276,8 +281,7 @@ class UploadPdfDelegate(
             return
         }
         try {
-            Timber.tag(TAG)
-                .d("한자 설치 시작 - bookName: ${result.bookName}, word count: ${result.word.size}")
+            Timber.tag(TAG).d("한자 설치 시작 - bookName: ${result.bookName}, word count: ${result.word.size}")
             installKanji(result.bookName, result.word)
             Timber.tag(TAG).d("한자 설치 완료")
             onUploadSuccess(result)
@@ -307,6 +311,7 @@ class UploadPdfDelegate(
     private fun resetUploadState() {
         currentUploadUri = null
         currentUploadName = ""
+        currentTaskId = null  // 추가
         isCancelled.set(false)
     }
 }

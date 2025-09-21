@@ -9,7 +9,7 @@ import com.yju.presentation.base.BaseListAdapter
  * PDF 목록을 표시하는 어댑터
  */
 class PdfListAdapter(
-    private val onItemDeleteClick: (Long) -> Unit, // 명확한 이름으로 변경
+    private val onItemDeleteClick: (Long) -> Unit,
     private val onItemViewClick: ((Long) -> Unit)? = null,
     var isDeleteMode: Boolean = true
 ) : BaseListAdapter<KanjiModel>(
@@ -20,7 +20,6 @@ class PdfListAdapter(
      * 이벤트 핸들러 클래스
      */
     inner class EventHandler {
-        // XML에서 호출하는 메서드 이름과 정확히 일치시킴
         fun deleteMode(): Boolean = isDeleteMode
 
         // 항목 전체 클릭 처리 - 상세 보기로 이동
@@ -38,11 +37,9 @@ class PdfListAdapter(
     }
 
     init {
-        // 이벤트 핸들러 초기화
         eventHolder = EventHandler()
     }
 
-    // 목록 갱신 시 메모리 참조 문제 방지
     override fun submitList(list: List<KanjiModel>?) {
         super.submitList(list?.let { ArrayList(it) })
     }

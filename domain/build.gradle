@@ -15,7 +15,7 @@ android {
     defaultConfig {
         // Remove applicationId as this is a library module
         minSdk 24
-        targetSdk 34
+        targetSdk 35
 
         // These can stay if you need them for your library
         versionCode 1
@@ -81,6 +81,12 @@ dependencies {
 
     implementation "com.jakewharton.timber:timber:5.0.1"
 
+    // Krossbow 라이브러리 버전 확인
+    implementation "org.hildan.krossbow:krossbow-stomp-core:5.7.0"  // 또는 최신 버전
+    implementation "org.hildan.krossbow:krossbow-websocket-okhttp:5.7.0"
+
+    // Kotlinx Serialization
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0"
     // Testing
     testImplementation libs.junit
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0"

@@ -3,6 +3,7 @@ package com.yju.presentation.base
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.Activity
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -60,6 +61,12 @@ abstract class BaseActivity<B : ViewDataBinding, VM : BaseViewModel>(
             }
         }
     }
+
+    private fun isDarkMode(): Boolean {
+        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        return currentNightMode == Configuration.UI_MODE_NIGHT_YES
+    }
+
 
     // 로딩 애니메이터 캐싱
     private var animators: Triple<ObjectAnimator?, ObjectAnimator?, ObjectAnimator?> = Triple(null, null, null)
@@ -213,23 +220,31 @@ abstract class BaseActivity<B : ViewDataBinding, VM : BaseViewModel>(
             setVariable(BR.vm, viewModel)
             lifecycleOwner = this@BaseActivity
         }
+
+        // 다크 모드일 때 흰색 배경 (스플래시 제외)
+        if (isDarkMode()) {
+            binding.root.setBackgroundColor(Color.WHITE)
+        }
     }
 
     /**
      * 액티비티 종료 시 리소스 해제
      */
     override fun onDestroy() {
-        // 애니메이션 정리
-        animators.first?.cancel()
-        animators.second?.cancel()
-        animators.third?.cancel()
-        animators = Triple(null, null, null)
+        try {
+            // 애니메이션 정리
+            animators.first?.cancel()
+            animators.second?.cancel()
+            animators.third?.cancel()
+            animators = Triple(null, null, null)
 
-        // 다이얼로그가 표시 중이면 닫기
-        if (loadingDialog.isShowing) {
-            loadingDialog.dismiss()
+            // 다이얼로그 정리
+            if (loadingDialog.isShowing) {
+                loadingDialog.dismiss()
+            }
+        } catch (e: Exception) {
+            Log.e("BaseActivity", "onDestroy error: ${e.message}")
         }
-
         super.onDestroy()
     }
 

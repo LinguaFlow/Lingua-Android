@@ -13,4 +13,7 @@ data class FileUploadResponse(
 
     @SerializedName("status")
     val status: String
-)
+) {
+    val webSocketChannel: String
+        get() = "/topic/upload/$taskId"
+}

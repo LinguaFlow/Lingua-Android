@@ -49,31 +49,44 @@ class PdfRepositoryImpl @Inject constructor(
 
     // 처리 완료된 PDF 결과 조회
     override suspend fun getPdfProcessedResult(id: Long): Result<PdfModel> {
-        Log.d("PdfDebug", "결과 조회 시작 - ID: $id")
         return when (val response = remoteDataSource.getPdfProcessedResult(id)) {
             is NetworkState.Success -> {
-                Log.d("PdfDebug", "서버 응답 성공 - 매핑 시작")
                 try {
                     val result = response.body.toPdfModel()
-                    Log.d("PdfDebug", "매핑 성공")
                     Result.success(result)
                 } catch (e: Exception) {
-                    Log.e("PdfDebug", "매핑 실패: ${e.message}", e)
                     Result.failure(e)
                 }
             }
             is NetworkState.Failure -> {
-                Log.e("PdfDebug", "네트워크 실패: ${response.message}")
                 Result.failure(RetrofitFailureStateException(response.message, response.code))
             }
             is NetworkState.NetworkError -> {
-                Log.e("PdfDebug", "네트워크 에러")
                 Result.failure(IllegalStateException("네트워크 에러"))
             }
             is NetworkState.UnknownError -> {
-                Log.e("PdfDebug", "알 수 없는 에러")
                 Result.failure(IllegalStateException("알 수 없는 에러"))
             }
+        }
+    }
+
+    override suspend fun deleteVocabulary(vocabularyUploadId: Long): Result<Unit> {
+        TODO("Not yet implemented")
+    }
+
+
+    override suspend fun cancelUpload(id: Long): Result<Unit> {
+        return when (val response = remoteDataSource.cancelUpload(id)) {
+            is NetworkState.Success -> Result.success(Unit)
+            is NetworkState.Failure -> Result.failure(
+                RetrofitFailureStateException(response.message, response.code)
+            )
+            is NetworkState.NetworkError -> Result.failure(
+                IllegalStateException("네트워크 오류")
+            )
+            is NetworkState.UnknownError -> Result.failure(
+                IllegalStateException("알 수 없는 오류")
+            )
         }
     }
 }

@@ -8,8 +8,12 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import androidx.core.graphics.drawable.toDrawable
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.updatePadding
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
@@ -32,10 +36,7 @@ class MenuDrawerFragment : DialogFragment() {
 
     companion object {
         private const val TAG = "MenuDrawerFragment"
-
-        fun newInstance(): MenuDrawerFragment {
-            return MenuDrawerFragment()
-        }
+        fun newInstance() = MenuDrawerFragment()
     }
 
     override fun onCreateView(
@@ -52,6 +53,7 @@ class MenuDrawerFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupDialog()
+        setupSystemUIInsets()
         setupUserInfo()
         setupMenuClickListeners()
         observeViewModel()
@@ -59,23 +61,39 @@ class MenuDrawerFragment : DialogFragment() {
 
     private fun setupDialog() {
         dialog?.window?.let { window ->
+            // Edge-to-Edge 설정
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+
+            // 윈도우 인셋 컨트롤러 설정
+            val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+            windowInsetsController.isAppearanceLightStatusBars = true
+            windowInsetsController.isAppearanceLightNavigationBars = true
+
+            // 레이아웃 설정
             window.setLayout(
                 resources.getDimensionPixelSize(R.dimen.drawer_width),
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
 
             window.setGravity(Gravity.END)
-            window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
-            window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
             window.setWindowAnimations(R.style.DrawerAnimation)
             window.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
         }
 
-        // 배경 클릭 시 dismiss 처리
         dialog?.setCanceledOnTouchOutside(true)
-        dialog?.setOnCancelListener {
-            // 자연스러운 애니메이션으로 사라지도록
-            dismissWithAnimation()
+    }
+
+    private fun setupSystemUIInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            // 상단 패딩 (상태바)
+            binding.headerSection.updatePadding(top = systemBars.top + 24)
+
+            // 하단 패딩 (네비게이션 바)
+            binding.bottomSection.updatePadding(bottom = systemBars.bottom + 24)
+
+            insets
         }
     }
 
@@ -116,31 +134,27 @@ class MenuDrawerFragment : DialogFragment() {
     }
 
     private fun observeViewModel() {
-        // PDF 관리로 이동
         repeatOnStarted {
             viewModel.navigateToPdfManager.collect {
                 homeViewModel.navigateToPdfUpload()
-                dismissWithAnimation()
+                dismiss()
             }
         }
 
-        // 단어장 기능 (준비중)
         repeatOnStarted {
             viewModel.navigateToVocabulary.collect {
                 showToast("단어장 기능은 준비 중입니다")
-                dismissWithAnimation()
+                dismiss()
             }
         }
 
-        // 설정 기능 (준비중)
         repeatOnStarted {
             viewModel.navigateToSettings.collect {
                 showToast("설정 기능은 준비 중입니다")
-                dismissWithAnimation()
+                dismiss()
             }
         }
 
-        // 로그인 화면으로 이동
         repeatOnStarted {
             viewModel.navigateToLogin.collect {
                 navigateToLogin()
@@ -150,7 +164,7 @@ class MenuDrawerFragment : DialogFragment() {
 
     private fun navigateToLogin() {
         Log.d(TAG, "로그인 화면으로 이동")
-        dismissWithAnimation() // 애니메이션과 함께 닫기
+        dismiss()
 
         val intent = Intent(requireContext(), LoginActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -159,19 +173,11 @@ class MenuDrawerFragment : DialogFragment() {
         requireActivity().finish()
     }
 
-    private fun dismissWithAnimation() {
-        // 애니메이션이 적용된 dismiss
-        dialog?.window?.setWindowAnimations(R.style.DrawerAnimation)
-        dismiss()
-    }
-
     private fun showToast(message: String) {
         android.widget.Toast.makeText(requireContext(), message, android.widget.Toast.LENGTH_SHORT).show()
     }
 
-    override fun getTheme(): Int {
-        return R.style.DrawerDialogTheme  // 커스텀 테마 사용
-    }
+    override fun getTheme(): Int = R.style.DrawerDialogTheme
 
     override fun onDestroyView() {
         _binding = null

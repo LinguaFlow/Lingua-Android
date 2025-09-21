@@ -23,4 +23,12 @@ class PdfRemoteDataSourceImpl @Inject constructor(
     override suspend fun getPdfProcessedResult(id: Long): NetworkState<PdfFileUploadResponse> {
         return pdfService.getPdfProcessedResult(id)
     }
+
+    override suspend fun deleteVocabulary(vocabularyUploadId: Long): Result<Unit> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun cancelUpload(id: Long): NetworkState<Unit> {
+        return pdfService.cancelUpload(id)
+    }
 }
