@@ -1,13 +1,17 @@
 plugins {
     id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'  // 버전 제거! (루트에서 상속)
+    id 'org.jetbrains.kotlin.android'
     id 'androidx.navigation.safeargs.kotlin'
     id 'kotlin-parcelize'
     id 'kotlin-kapt'
     id 'com.google.dagger.hilt.android'
-    id 'org.jetbrains.kotlin.plugin.serialization'  // 버전 제거!
+    id 'org.jetbrains.kotlin.plugin.serialization'
     id 'com.google.gms.google-services'
 }
+
+// local.properties 파일 로드 (android 블록 밖에 선언)
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
 android {
     namespace 'com.yju.presentation'
@@ -17,21 +21,32 @@ android {
         applicationId "com.yju.presentation"
         minSdk 24
         targetSdk 35
-        versionCode 6
-        versionName "1.6"
+        versionCode 9
+        versionName "1.9"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        // BuildConfig 필드 추가 - 실제 값으로 교체 필요
-        buildConfigField "String", "NAVER_CLIENT_ID", "\"YOUR_NAVER_CLIENT_ID\""
-        buildConfigField "String", "NAVER_CLIENT_SECRET", "\"YOUR_NAVER_CLIENT_SECRET\""
-        buildConfigField "String", "KAKAO_NATIVE_APP_KEY", "\"1215c9cf59e838e0fc1f1f2d2b37a9a7\""
+        // BuildConfig 필드 추가 (코드에서 사용)
+        buildConfigField "String", "KAKAO_NATIVE_APP_KEY", "\"${properties['KAKAO_NATIVE_APP_KEY']}\""
+        buildConfigField "String", "NAVER_CLIENT_ID", "\"${properties['NAVER_CLIENT_ID']}\""
+        buildConfigField "String", "NAVER_CLIENT_SECRET", "\"${properties['NAVER_CLIENT_SECRET']}\""
 
-        // Manifest placeholders
+        // Manifest placeholders (AndroidManifest.xml에서 사용)
         manifestPlaceholders = [
-                KAKAO_NATIVE_APP_KEY: "1215c9cf59e838e0fc1f1f2d2b37a9a7",
-                NAVER_CLIENT_ID: "YOUR_NAVER_CLIENT_ID",
-                NAVER_CLIENT_SECRET: "YOUR_NAVER_CLIENT_SECRET"
+                KAKAO_NATIVE_APP_KEY: properties['KAKAO_NATIVE_APP_KEY'],
+                NAVER_CLIENT_ID: properties['NAVER_CLIENT_ID'],
+                NAVER_CLIENT_SECRET: properties['NAVER_CLIENT_SECRET']
         ]
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            debuggable true
+        }
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
     }
 
     compileOptions {
@@ -48,7 +63,7 @@ android {
     buildFeatures {
         dataBinding true
         viewBinding true
-        buildConfig true
+        buildConfig true  // BuildConfig 생성 활성화
     }
 }
 
@@ -62,36 +77,36 @@ dependencies {
     implementation project(':domain')
     implementation project(':data')
 
-    // AndroidX
+    // AndroidX Core
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
     implementation libs.material
     implementation libs.androidx.activity
     implementation libs.androidx.constraintlayout
 
-    // 네트워킹
-    implementation 'com.squareup.retrofit2:converter-scalars:2.9.0'
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-    implementation 'com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0'
-    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
-
-    // Desugaring
+    // Desugaring (Java 8+ API support)
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.1.5"
 
-    // Navigation
+    // Navigation Component
     implementation "androidx.navigation:navigation-fragment-ktx:2.7.7"
     implementation "androidx.navigation:navigation-ui-ktx:2.7.7"
 
-    // Hilt
+    // Dependency Injection - Hilt
     implementation "com.google.dagger:hilt-android:2.51.1"
     kapt "com.google.dagger:hilt-compiler:2.51.1"
 
-    // Room
+    // Database - Room
     implementation "androidx.room:room-runtime:2.6.1"
     implementation "androidx.room:room-ktx:2.6.1"
     kapt "androidx.room:room-compiler:2.6.1"
+
+    // Networking - Retrofit & OkHttp
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-scalars:2.9.0'
+    implementation 'com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
 
     // Kotlin Serialization
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3"
@@ -99,24 +114,27 @@ dependencies {
     // Lifecycle & ViewModel
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.7.0"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.7.0"
 
-    // Firebase BoM & Analytics/Auth (중복 제거)
+    // Firebase
     implementation platform("com.google.firebase:firebase-bom:33.13.0")
     implementation "com.google.firebase:firebase-analytics-ktx"
     implementation "com.google.firebase:firebase-auth-ktx"
 
-    // 소셜 로그인 SDK
-    // Kakao SDK
+    // Social Login SDKs
+    // Kakao
     implementation "com.kakao.sdk:v2-user:2.20.1"
     implementation "com.kakao.sdk:v2-auth:2.20.1"
 
-    // Naver SDK
+    // Naver
     implementation 'com.navercorp.nid:oauth:5.9.1'
 
-    // Timber (로깅)
+    // WorkManager
+    implementation "androidx.work:work-runtime-ktx:2.9.0"
+
+    // Logging
     implementation 'com.jakewharton.timber:timber:5.0.1'
 
-    implementation "androidx.work:work-runtime-ktx:2.9.0"
     // Testing
     testImplementation libs.junit
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0"
